@@ -1,3 +1,4 @@
+from django.utils.translation import ugettext_lazy as _
 from robinson.exceptions import UnknownLocationError
 from gmapi import maps
 
