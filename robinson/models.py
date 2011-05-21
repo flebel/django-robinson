@@ -1,6 +1,7 @@
 from django.db import models
 from django.forms import ValidationError
 from django.utils.translation import ugettext_lazy as _
+from robinson import apis
 from robinson import utils
 from robinson.exceptions import UnknownLocationError
 from sorl.thumbnail import ImageField
@@ -88,17 +89,17 @@ class Photo(models.Model):
             self.longitude = longitude * utils.get_longitude_ref_multiplier(metadata)
             # Geocode the coordinates to estimate the address or place name
             latlon = '%f,%f' % (self.latitude, self.longitude)
-            location = utils.geocode(latlon)
+            location = apis.geocode(latlon)
             self.estimated_location = location['formatted_address']
         elif self.location:
             try:
                 # Use the Geocoding and Elevation APIs to get the elevation,
                 # latitude and longitude coordinates
-                location = utils.geocode(self.location)
+                location = apis.geocode(self.location)
                 self.estimated_location = location['formatted_address']
                 self.latitude = location['geometry']['location']['arg'][0]
                 self.longitude = location['geometry']['location']['arg'][1]
-                elevation = utils.elevation(self.latitude, self.longitude)
+                elevation = apis.elevation(self.latitude, self.longitude)
                 self.elevation = elevation
             except UnknownLocationError as e:
                 raise ValidationError(e)
