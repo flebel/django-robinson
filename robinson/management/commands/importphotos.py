@@ -30,7 +30,7 @@ class Command(BaseCommand):
             photo = Photo()
             # Set the estimated location to a specific flag as a way to
             # determine if the photo has valid geolocation data
-            photo.estimated_location = Photo.UNDEFINED_ESTIMATED_LOCATION
+            photo.estimated_location = Photo.IMPORT_ESTIMATED_LOCATION
             photo.filename = os.path.split(file)[-1]
             photo.set_file(file)
             photo.save()
