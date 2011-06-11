@@ -44,7 +44,7 @@ Robinson does not yet have any configurable options.
 Management command
 ==================
 
-`importphotos': Accepts the path to a directory containing files with a JPG or JPEG extension (case insensitive) as a positional argument and imports all photos in that directory, non recursively. The photos that do not contain geolocation EXIF metadata will be imported but it will be necessary to set their location manually through the admin form.
+`importphotos`: Accepts the path to a directory containing files with a JPG or JPEG extension (case insensitive) as a positional argument and imports all photos in that directory, non recursively. The photos that do not contain geolocation EXIF metadata will be imported but it will be necessary to set their location manually through the admin form.
 
 Issues
 ======
