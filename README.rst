@@ -13,7 +13,6 @@ Currently, the following features have been written and are functional:
 
 These are the features that are planned for future versions, in order of priority:
 
-- Write a Django management command to batch import files
 - Write a demo app, deploy and open-source it
 - Add an admin form to replace EXIF tag values with hardcoded values, ie. to correct the name of a misidentified third party lens
 - Store the weather for the location at the time the photo was taken
@@ -41,6 +40,11 @@ Configuration
 =============
 
 Robinson does not yet have any configurable options.
+
+Management command
+==================
+
+`importphotos': Accepts the path to a directory containing files with a JPG or JPEG extension (case insensitive) as a positional argument and imports all photos in that directory, non recursively. The photos that do not contain geolocation EXIF metadata will be imported but it will be necessary to set their location manually through the admin form.
 
 Issues
 ======

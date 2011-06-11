@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.files import File
 from django.forms import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from robinson import apis, utils
@@ -26,6 +27,7 @@ class ExifTag(models.Model):
         unique_together = ('key', 'photo')
 
 class Photo(models.Model):
+    IMPORT_ESTIMATED_LOCATION = 'UNDEFINED'
     # Room has been left in between the keys to make my life easier
     # in a few months from now ;-)
     LOCATION_ACCURACY_CHOICES = (
@@ -103,8 +105,11 @@ class Photo(models.Model):
             except UnknownLocationError as e:
                 raise ValidationError(e)
         else:
-            raise ValidationError(_("No EXIF GPS metadata was present in the file. " +
-                "Please enter a valid location."))
+            # Raise the exception only if we are not importing photos from the
+            # management command
+            if not self.estimated_location == Photo.IMPORT_ESTIMATED_LOCATION:
+                raise ValidationError(_("No EXIF GPS metadata was present in the file. " +
+                    "Please enter a valid location."))
         super(Photo, self).save(*args, **kwargs)
         # Delete all EXIF tags associated to the photo then add them again.
         # This is required to support to change the JPEG file associated
@@ -114,6 +119,28 @@ class Photo(models.Model):
         ExifTag.objects.filter(photo=self).delete()
         for key in metadata.exif_keys:
             ExifTag.objects.create(key=key, value=metadata[key].human_value, photo=self)
+
+    def is_valid(self):
+        """
+        Returns True if the estimated_location is valid.
+        """
+        return not self.estimated_location == Photo.IMPORT_ESTIMATED_LOCATION
+
+    def set_invalid(self):
+        """
+        Sets a flag in the estimated_location field because the geolocation
+        data is invalid.
+        """
+        self.estimated_location = Photo.IMPORT_ESTIMATED_LOCATION
+
+    def set_file(self, file):
+        """
+        Sets the photo's file to the file for which the path and filename
+        is given as an argument.
+        """
+        filename = os.path.split(file)[-1]
+        with open(file) as content:
+            self.file.save(filename, File(content), False)
 
     def get_elevation(self):
         """
