@@ -1,8 +1,7 @@
 from django.db import models
 from django.forms import ValidationError
 from django.utils.translation import ugettext_lazy as _
-from robinson import apis
-from robinson import utils
+from robinson import apis, utils
 from robinson.exceptions import UnknownLocationError
 from sorl.thumbnail import ImageField
 from tagging.fields import TagField
