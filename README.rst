@@ -35,7 +35,7 @@ Installation
    * `sorl-thumbnail`: https://github.com/sorl/sorl-thumbnail
    * `django-tagging`: http://code.google.com/p/django-tagging/
 
-#. Install `pyexiv2`: http://tilloy.net/dev/pyexiv2/
+#. Install `pyexiv2` 0.3.0: http://tilloy.net/dev/pyexiv2/
 
 Configuration
 =============

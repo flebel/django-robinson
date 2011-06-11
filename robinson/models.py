@@ -80,7 +80,7 @@ class Photo(models.Model):
         # Set the elevation, latitude and longitude from the EXIF data if it
         # contains these informations
         if set(self.REQUIRED_EXIF_KEYS).issubset(set(metadata.exif_keys)):
-            self.elevation = metadata['Exif.GPSInfo.GPSAltitude'].value.to_float()
+            self.elevation = metadata['Exif.GPSInfo.GPSAltitude'].value
             latitude_tuple = utils.get_latitude_tuple(metadata)
             latitude = utils.dms_to_decimal(latitude_tuple)
             longitude_tuple = utils.get_longitude_tuple(metadata)

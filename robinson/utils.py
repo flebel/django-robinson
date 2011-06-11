@@ -19,7 +19,7 @@ def get_latitude_tuple(imgMetadata):
     Returns the tuple containing the degrees, minutes and seconds of the
     latitude coordinate as float values.
     """
-    return (imgMetadata['Exif.GPSInfo.GPSLatitude'].value[0].to_float(), imgMetadata['Exif.GPSInfo.GPSLatitude'].value[1].to_float(), imgMetadata['Exif.GPSInfo.GPSLatitude'].value[2].to_float())
+    return (imgMetadata['Exif.GPSInfo.GPSLatitude'].value[0], imgMetadata['Exif.GPSInfo.GPSLatitude'].value[1], imgMetadata['Exif.GPSInfo.GPSLatitude'].value[2])
 
 def get_longitude_ref_multiplier(imgMetadata):
     """
@@ -35,5 +35,5 @@ def get_longitude_tuple(imgMetadata):
     Returns the tuple containing the degrees, minutes and seconds of the
     longitude coordinate as float values.
     """
-    return (imgMetadata['Exif.GPSInfo.GPSLongitude'].value[0].to_float(), imgMetadata['Exif.GPSInfo.GPSLongitude'].value[1].to_float(), imgMetadata['Exif.GPSInfo.GPSLongitude'].value[2].to_float())
+    return (imgMetadata['Exif.GPSInfo.GPSLongitude'].value[0], imgMetadata['Exif.GPSInfo.GPSLongitude'].value[1], imgMetadata['Exif.GPSInfo.GPSLongitude'].value[2])
 
