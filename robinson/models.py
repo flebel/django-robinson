@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.core.files import File
 from django.forms import ValidationError
 from django.utils.translation import ugettext_lazy as _
@@ -68,6 +68,7 @@ class Photo(models.Model):
             return self.get_location()
         return '%s (%s)' % (unicode(name), self.get_location())
 
+    @transaction.commit_on_success
     def save(self, *args, **kwargs):
         new_filename = os.path.split(self.file.name)[-1]
         temporary_file_path = self.file.file.file.name
