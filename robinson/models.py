@@ -119,8 +119,8 @@ class Photo(models.Model):
         # ValidationError: [u'Select a valid choice. That choice is not one of
         # the available choices.'] exception thrown when updating an instance
         # of the Photo model that is referred from ExifTag instances
-        # For now, the unsatisfactory solution is that the EXIF tags are no
-        # longer updated when a photo is saved
+        # For now, the unsatisfactory solution is that the EXIF tags are saved
+        # only when the Photo instance is initially created
         if pk is None:
             for key in metadata.exif_keys:
                 ExifTag.objects.create(key=key, value=metadata[key].human_value, photo=self)
