@@ -49,6 +49,7 @@ Management command
 Issues
 ======
 
+- A workaround for issue #1 (https://github.com/flebel/django-robinson/issues/1) has made it impossible to update the file associated with an instance of a Photo model; you will need to recreate an instance if you want to update a file
 - Google Geocoding and Elevation APIs are subject to a query limit of 2,500 geolocation requests per day, per IP address. The geocoding is done on the server, thus potentially limiting the geolocation requests for other applications sharing the external IP address
 - The application is currently limited to a single map which can be edited by any user with the right permissions
 
