@@ -51,7 +51,7 @@ class Photo(models.Model):
                           'Exif.GPSInfo.GPSLongitudeRef')
     file = ImageField(upload_to=get_photo_upload_path, verbose_name=_('Photo'))
     name = models.CharField(blank=True, max_length=200, verbose_name=_('Name'))
-    location = models.CharField(blank=True, help_text=_('You are required to specify a location if the JPEG file does not contain geolocation EXIF metadata.'), max_length=200, verbose_name=_('Location'))
+    location = models.CharField(blank=True, help_text=_('You are required to specify a location if the JPEG file does not contain geolocation EXIF metadata.<br/>In the event that a JPEG file contains geolocation EXIF metadata, this location will be reverse geocoded and used as the location where the photo was taken.'), max_length=200, verbose_name=_('Location'))
     location_accuracy = models.SmallIntegerField(choices=LOCATION_ACCURACY_CHOICES, default=LOCATION_ACCURACY_CHOICES[-1][0], help_text=_('The estimated accuracy of the location.'), verbose_name=_('Location accuracy'))
     description = models.TextField(blank=True, verbose_name=_('Description'))
     tags = TagField()
@@ -78,9 +78,21 @@ class Photo(models.Model):
             raise ValidationError(_('It is not possible to update the file of an existing instance. See issue #1 at https://github.com/flebel/django-robinson/issues/1 for more details.'))
         metadata = pyexiv2.ImageMetadata(temporary_file_path)
         metadata.read()
-        # Set the elevation, latitude and longitude from the EXIF data if it
+        # Use the Geocoding and Elevation APIs to get the elevation,
+        # latitude and longitude coordinates from the location specified
+        if self.location:
+            try:
+                location = apis.geocode(self.location)
+                self.estimated_location = location['formatted_address']
+                self.latitude = location['geometry']['location']['arg'][0]
+                self.longitude = location['geometry']['location']['arg'][1]
+                elevation = apis.elevation(self.latitude, self.longitude)
+                self.elevation = elevation
+            except UnknownLocationError as e:
+                raise ValidationError(e)
+        # Set the elevation, latitude and longitude from the EXIF metadata if it
         # contains these informations
-        if set(self.REQUIRED_EXIF_KEYS).issubset(set(metadata.exif_keys)):
+        elif set(self.REQUIRED_EXIF_KEYS).issubset(set(metadata.exif_keys)):
             self.elevation = metadata['Exif.GPSInfo.GPSAltitude'].value
             latitude_tuple = utils.get_latitude_tuple(metadata)
             latitude = utils.dms_to_decimal(latitude_tuple)
@@ -92,18 +104,6 @@ class Photo(models.Model):
             latlon = '%f,%f' % (self.latitude, self.longitude)
             location = apis.geocode(latlon)
             self.estimated_location = location['formatted_address']
-        elif self.location:
-            try:
-                # Use the Geocoding and Elevation APIs to get the elevation,
-                # latitude and longitude coordinates
-                location = apis.geocode(self.location)
-                self.estimated_location = location['formatted_address']
-                self.latitude = location['geometry']['location']['arg'][0]
-                self.longitude = location['geometry']['location']['arg'][1]
-                elevation = apis.elevation(self.latitude, self.longitude)
-                self.elevation = elevation
-            except UnknownLocationError as e:
-                raise ValidationError(e)
         else:
             # Raise the exception only if we are not importing photos from the
             # management command
