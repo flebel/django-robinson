@@ -72,11 +72,10 @@ class Photo(models.Model):
     def save(self, *args, **kwargs):
         new_filename = os.path.split(self.file.name)[-1]
         temporary_file_path = self.file.file.file.name
-        # Do not update the original filename if it is the same as the
-        # uploaded filename because that would mean that the file wasn't
-        # modified and we would lose the original filename!
+        # Safeguard against the unsatisfactory bug fix for issue #1
+        # https://github.com/flebel/django-robinson/issues/1
         if (not new_filename == os.path.split(temporary_file_path)[-1]):
-            self.filename = new_filename
+            raise ValidationError(_('It is not possible to update the file of an existing instance. See issue #1 at https://github.com/flebel/django-robinson/issues/1 for more details.'))
         metadata = pyexiv2.ImageMetadata(temporary_file_path)
         metadata.read()
         # Set the elevation, latitude and longitude from the EXIF data if it
@@ -111,15 +110,20 @@ class Photo(models.Model):
             if not self.estimated_location == Photo.IMPORT_ESTIMATED_LOCATION:
                 raise ValidationError(_("No EXIF GPS metadata was present in the file. " +
                     "Please enter a valid location."))
+        # Get the instance's pk before we save it so that we can know its state
+        # when we create the ExifTag instances for that photo a few lines below
+        pk = self.pk
         super(Photo, self).save(*args, **kwargs)
-        # Delete all EXIF tags associated to the photo then add them again.
-        # This is required to support to change the JPEG file associated
-        # with this model instance. This has to be done after the instance
-        # has been saved as we are passing the current photo instance to
-        # the ExifTag instances to be created.
-        ExifTag.objects.filter(photo=self).delete()
-        for key in metadata.exif_keys:
-            ExifTag.objects.create(key=key, value=metadata[key].human_value, photo=self)
+        # https://github.com/flebel/django-robinson/issues/1
+        # The following condition fixes a bug where there would be a
+        # ValidationError: [u'Select a valid choice. That choice is not one of
+        # the available choices.'] exception thrown when updating an instance
+        # of the Photo model that is referred from ExifTag instances
+        # For now, the unsatisfactory solution is that the EXIF tags are no
+        # longer updated when a photo is saved
+        if pk is None:
+            for key in metadata.exif_keys:
+                ExifTag.objects.create(key=key, value=metadata[key].human_value, photo=self)
 
     def is_valid(self):
         """
