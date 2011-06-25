@@ -16,6 +16,7 @@ These are the features that are planned for future versions, in order of priorit
 - Write a demo app, deploy and open-source it
 - Add an admin form to replace EXIF tag values with hardcoded values, ie. to correct the name of a misidentified third party lens
 - Store the weather for the location at the time the photo was taken
+- Write a management command to tag photos according to their location (ie. tag by country, state and city)
 - Support photos without a specified location, either estimated or with latitude and longitude coordinates
 - Move the geocoding and elevation API calls to the client's browser to leverage the 2,500 geolocation requests per day limits
 - Add support for multiple maps and users
