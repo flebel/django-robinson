@@ -74,8 +74,10 @@ class Photo(models.Model):
         temporary_file_path = self.file.file.file.name
         # Safeguard against the unsatisfactory bug fix for issue #1
         # https://github.com/flebel/django-robinson/issues/1
-        if (not new_filename == os.path.split(temporary_file_path)[-1]):
+        if (self.pk):
             raise ValidationError(_('It is not possible to update the file of an existing instance. See issue #1 at https://github.com/flebel/django-robinson/issues/1 for more details.'))
+        else:
+            self.filename = new_filename
         metadata = pyexiv2.ImageMetadata(temporary_file_path)
         metadata.read()
         # Use the Geocoding and Elevation APIs to get the elevation,
