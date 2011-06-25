@@ -152,7 +152,7 @@ class Photo(models.Model):
         Returns the elevation with its unit suffix.
         """
         if self.elevation:
-            return unicode(self.elevation) + ' m'
+            return unicode(round(self.elevation, 2)) + ' m'
     get_elevation.short_description = _('Elevation')
 
     def get_location(self):
