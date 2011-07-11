@@ -20,7 +20,7 @@ These are the features that are planned for future versions, in order of priorit
 - Support photos without a specified location, either estimated or with latitude and longitude coordinates
 - Move the geocoding and elevation API calls to the client's browser to leverage the 2,500 geolocation requests per day limits
 - Add support for multiple maps and users
-- Support alternative geocoding, reverse geocoding and elevation APIs (i.e. replace django-gmapi with geopy)
+- Support alternative geocoding, reverse geocoding and elevation APIs (ie. replace django-gmapi with geopy)
 
 Installation
 ============
