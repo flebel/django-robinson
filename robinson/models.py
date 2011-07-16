@@ -1,4 +1,5 @@
 from django.db import models, transaction
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.files import File
 from django.forms import ValidationError
 from django.utils.translation import ugettext_lazy as _
@@ -19,12 +20,41 @@ def get_photo_upload_path(instance, filename):
     return 'photos/%s%s' % (uuid.uuid4(), extension)
 
 class ExifTag(models.Model):
-    key = models.CharField(blank=False, max_length=256, null=False, verbose_name=_('Key'))
+    KEY_LENGTH = 256
+    key = models.CharField(blank=False, max_length=KEY_LENGTH, null=False, verbose_name=_('Key'))
     value = models.TextField(blank=True, help_text=_("The human representation of the EXIF tag's value."), null=True, verbose_name=_('Value'))
     photo = models.ForeignKey('Photo')
-    
+
     class Meta:
         unique_together = ('key', 'photo')
+
+    @property
+    def substituted_value(self):
+        """
+        Returns the substituted EXIF tag's value if an instance of
+        ExifTagSubstitute matches the EXIF tag's key and current value,
+        else returns the actual value of the tag.
+        """
+        # TODO: This code has room for improvement as a query is made for every
+        # EXIF tag *displayed*, but for now it is the least of my concerns
+        # as this project is deployed on an extremely low traffic site
+        try:
+            return ExifTagSubstitute.objects.filter(key=self.key, original_value=self.value).latest('pk').substitute_value
+        except ObjectDoesNotExist:
+            return self.value
+
+class ExifTagSubstitute(models.Model):
+    key = models.CharField(blank=False, max_length=ExifTag.KEY_LENGTH, null=False, verbose_name=_('Key'))
+    original_value = models.TextField(blank=True, help_text=_("EXIF tag's value to replace."), null=True, verbose_name=_('Original value'))
+    substitute_value = models.TextField(blank=True, null=True, verbose_name=_('Substitute value'))
+    active = models.BooleanField(blank=False, default=True, null=False, verbose_name=_('Active'))
+
+    class Meta:
+        verbose_name = 'EXIF tag substitute'
+        verbose_name_plural = 'EXIF tag substitutes'
+
+    def __unicode__(self):
+        return self.key
 
 class Photo(models.Model):
     IMPORT_ESTIMATED_LOCATION = 'UNDEFINED'

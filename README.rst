@@ -6,6 +6,7 @@ Robinson is a Django application that can be used as the underlying foundation f
 
 Currently, the following features have been written and are functional:
 
+- Replaces given EXIF tag values with hardcoded values configured through an admin form, ie. to correct the name of a misidentified third party lens
 - Estimates the elevation from the latitude and longitude coordinates
 - Geocodes a readable address or place name specified in the admin form when no geolocation data is found in the EXIF metadata
 - Reverse geocodes latitude and longitude coordinates to a readable address or place name
@@ -14,7 +15,6 @@ Currently, the following features have been written and are functional:
 These are the features that are planned for future versions, in order of priority:
 
 - Write a demo app, deploy and open-source it
-- Add an admin form to replace EXIF tag values with hardcoded values, ie. to correct the name of a misidentified third party lens
 - Store the weather for the location at the time the photo was taken
 - Write a management command to tag photos according to their location (ie. tag by country, state and city)
 - Support photos without a specified location, either estimated or with latitude and longitude coordinates

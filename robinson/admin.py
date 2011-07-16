@@ -11,6 +11,13 @@ class ExifTagInline(admin.TabularInline):
     model = ExifTag
     readonly_fields = ('key', 'value')
 
+class ExifTagSubstituteAdmin(AdminImageMixin, admin.ModelAdmin):
+    model = ExifTagSubstitute
+    list_display = ('key', 'original_value', 'substitute_value', 'active')
+    list_filter = ('active',)
+    save_on_top = True
+admin.site.register(ExifTagSubstitute, ExifTagSubstituteAdmin)
+
 class PhotoAdmin(AdminImageMixin, admin.ModelAdmin):
     inlines = (ExifTagInline,)
     model = Photo
