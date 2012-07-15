@@ -74,6 +74,20 @@ class Photo(models.Model):
         (100, _('Within 25 meters')),
         (110, _('Within 5 meters')),
     )
+    LOCATION_ACCURACY_IN_METERS = {
+        0: None,
+        10: 100*1000,
+        20: 50*1000,
+        30: 25*1000,
+        40: 15*1000,
+        50: 5*1000,
+        60: 1000,
+        70: 500,
+        80: 100,
+        90: 50,
+        100: 25,
+        110: 5,
+    }
     REQUIRED_EXIF_KEYS = ('Exif.GPSInfo.GPSAltitude',
                           'Exif.GPSInfo.GPSLatitude',
                           'Exif.GPSInfo.GPSLatitudeRef',
