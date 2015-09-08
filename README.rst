@@ -31,9 +31,9 @@ Installation
 
 #. Install the following Django apps and repeat the first two steps as necessary:
 
-   * `django-gmapi` **(fork)**: http://code.google.com/r/francoislebel-django-gmapi/
+   * `django-gmapi`: https://github.com/flebel/francoislebel-django-gmapi
    * `sorl-thumbnail`: https://github.com/sorl/sorl-thumbnail
-   * `django-tagging`: http://code.google.com/p/django-tagging/
+   * `django-tagging`: https://github.com/flebel/django-tagging
 
 #. Install `pyexiv2` 0.3.0: http://tilloy.net/dev/pyexiv2/
 
