@@ -112,7 +112,7 @@ class Photo(models.Model):
             return self.get_location()
         return '%s (%s)' % (unicode(name), self.get_location())
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def save(self, *args, **kwargs):
         new_filename = os.path.split(self.file.name)[-1]
         temporary_file_path = self.file.file.file.name
