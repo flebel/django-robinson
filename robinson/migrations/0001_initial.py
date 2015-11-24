@@ -1,77 +1,64 @@
-# encoding: utf-8
-import datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+from django.db import migrations, models
+import sorl.thumbnail.fields
+import robinson.models
+import tagging.fields
 
 
-class Migration(SchemaMigration):
+class Migration(migrations.Migration):
 
-    def forwards(self, orm):
-        
-        # Adding model 'ExifTag'
-        db.create_table('robinson_exiftag', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('key', self.gf('django.db.models.fields.CharField')(max_length=256)),
-            ('value', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('photo', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['robinson.Photo'])),
-        ))
-        db.send_create_signal('robinson', ['ExifTag'])
+    dependencies = [
+    ]
 
-        # Adding unique constraint on 'ExifTag', fields ['key', 'photo']
-        db.create_unique('robinson_exiftag', ['key', 'photo_id'])
-
-        # Adding model 'Photo'
-        db.create_table('robinson_photo', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('file', self.gf('sorl.thumbnail.fields.ImageField')(max_length=100)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=200, blank=True)),
-            ('location', self.gf('django.db.models.fields.CharField')(max_length=200, blank=True)),
-            ('location_accuracy', self.gf('django.db.models.fields.SmallIntegerField')(default=110)),
-            ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('tags', self.gf('tagging.fields.TagField')()),
-            ('filename', self.gf('django.db.models.fields.CharField')(max_length=256)),
-            ('estimated_location', self.gf('django.db.models.fields.CharField')(max_length=200, null=True, blank=True)),
-            ('elevation', self.gf('django.db.models.fields.FloatField')(null=True, blank=True)),
-            ('latitude', self.gf('django.db.models.fields.FloatField')(null=True, blank=True)),
-            ('longitude', self.gf('django.db.models.fields.FloatField')(null=True, blank=True)),
-        ))
-        db.send_create_signal('robinson', ['Photo'])
-
-    def backwards(self, orm):
-        
-        # Removing unique constraint on 'ExifTag', fields ['key', 'photo']
-        db.delete_unique('robinson_exiftag', ['key', 'photo_id'])
-
-        # Deleting model 'ExifTag'
-        db.delete_table('robinson_exiftag')
-
-        # Deleting model 'Photo'
-        db.delete_table('robinson_photo')
-
-    models = {
-        'robinson.exiftag': {
-            'Meta': {'unique_together': "(('key', 'photo'),)", 'object_name': 'ExifTag'},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'key': ('django.db.models.fields.CharField', [], {'max_length': '256'}),
-            'photo': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['robinson.Photo']"}),
-            'value': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'})
-        },
-        'robinson.photo': {
-            'Meta': {'object_name': 'Photo'},
-            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'elevation': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'estimated_location': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
-            'file': ('sorl.thumbnail.fields.ImageField', [], {'max_length': '100'}),
-            'filename': ('django.db.models.fields.CharField', [], {'max_length': '256'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'latitude': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'location': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
-            'location_accuracy': ('django.db.models.fields.SmallIntegerField', [], {'default': '110'}),
-            'longitude': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
-            'tags': ('tagging.fields.TagField', [], {})
-        }
-    }
-
-    complete_apps = ['robinson']
+    operations = [
+        migrations.CreateModel(
+            name='ExifTag',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('key', models.CharField(max_length=256, verbose_name='Key')),
+                ('value', models.TextField(help_text="The human representation of the EXIF tag's value.", null=True, verbose_name='Value', blank=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='ExifTagSubstitute',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('key', models.CharField(max_length=256, verbose_name='Key')),
+                ('original_value', models.TextField(help_text="EXIF tag's value to replace.", null=True, verbose_name='Original value', blank=True)),
+                ('substitute_value', models.TextField(null=True, verbose_name='Substitute value', blank=True)),
+                ('active', models.BooleanField(default=True, verbose_name='Active')),
+            ],
+            options={
+                'verbose_name': 'EXIF tag substitute',
+                'verbose_name_plural': 'EXIF tag substitutes',
+            },
+        ),
+        migrations.CreateModel(
+            name='Photo',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('file', sorl.thumbnail.fields.ImageField(upload_to=robinson.models.get_photo_upload_path, verbose_name='Photo')),
+                ('name', models.CharField(max_length=200, verbose_name='Name', blank=True)),
+                ('location', models.CharField(help_text='You are required to specify a location if the JPEG file does not contain geolocation EXIF metadata.<br/>In the event that a JPEG file contains geolocation EXIF metadata, this location will be reverse geocoded and used as the location where the photo was taken.', max_length=200, verbose_name='Location', blank=True)),
+                ('location_accuracy', models.SmallIntegerField(default=110, help_text='The estimated accuracy of the location.', verbose_name='Location accuracy', choices=[(0, 'Way off!'), (10, 'Within 100 kilometers'), (20, 'Within 50 kilometers'), (30, 'Within 25 kilometers'), (40, 'Within 15 kilometers'), (50, 'Within 5 kilometers'), (60, 'Within 1 kilometer'), (70, 'Within 500 meters'), (80, 'Within 100 meters'), (90, 'Within 50 meters'), (100, 'Within 25 meters'), (110, 'Within 5 meters')])),
+                ('description', models.TextField(verbose_name='Description', blank=True)),
+                ('tags', tagging.fields.TagField(max_length=255, blank=True)),
+                ('filename', models.CharField(verbose_name='Original filename', max_length=256, editable=False)),
+                ('estimated_location', models.CharField(verbose_name='Estimated location', max_length=200, null=True, editable=False, blank=True)),
+                ('elevation', models.FloatField(verbose_name='Elevation (m)', null=True, editable=False, blank=True)),
+                ('latitude', models.FloatField(verbose_name='Latitude', null=True, editable=False, blank=True)),
+                ('longitude', models.FloatField(verbose_name='Longitude', null=True, editable=False, blank=True)),
+            ],
+        ),
+        migrations.AddField(
+            model_name='exiftag',
+            name='photo',
+            field=models.ForeignKey(to='robinson.Photo'),
+        ),
+        migrations.AlterUniqueTogether(
+            name='exiftag',
+            unique_together=set([('key', 'photo')]),
+        ),
+    ]
