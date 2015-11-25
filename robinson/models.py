@@ -112,6 +112,14 @@ class Photo(models.Model):
             return self.get_location()
         return '%s (%s)' % (unicode(name), self.get_location())
 
+    @property
+    def date_taken(self):
+        try:
+            # Use the latest EXIF tag as the date at which the picture was taken
+            return self.exiftag_set.filter(key='Exif.Image.DateTime').latest('value').value
+        except ExifTag.DoesNotExist:
+            return None
+
     @transaction.commit_on_success
     def save(self, *args, **kwargs):
         new_filename = os.path.split(self.file.name)[-1]
