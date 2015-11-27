@@ -120,7 +120,7 @@ class Photo(models.Model):
         except ExifTag.DoesNotExist:
             return None
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def save(self, *args, **kwargs):
         new_filename = os.path.split(self.file.name)[-1]
         temporary_file_path = self.file.file.file.name
